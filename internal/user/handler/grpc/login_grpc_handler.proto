@@ -1,0 +1,24 @@
+syntax = "proto3";
+package grpc_handler;
+option go_package = "restapi/grpc_server";
+
+//Auth gRPC proto init
+message LoginRequest {
+  int32	ID = 1;    
+  string	Password = 2;
+  string	Username = 3;
+}
+
+message LoginResponse {
+  string	Username = 1;
+  string	Role = 2;
+  repeated  Token tokens = 3;
+}
+
+message Token {
+  string	Access = 1;
+  string	Refresh = 2;
+}
+service GrpcHandler {
+    rpc LoginHandler(LoginRequest) returns (LoginResponse) {}
+}

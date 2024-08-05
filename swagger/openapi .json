@@ -1,0 +1,2149 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Online Store - OpenAPI 3.0",
+    "description": "This is a backend for online store and implements:\n  - Product CRUD (include option and variants)\n  - Category CRUD\n  - Cart CRUD\n  - Order CRUD\n  \nSome useful links:\n- [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)\n- [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)",
+    "termsOfService": "http://swagger.io/terms/",
+    "contact": {
+      "email": "apiteam@swagger.io"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0.11"
+  },
+  "externalDocs": {
+    "description": "Find out more about Swagger",
+    "url": "http://swagger.io"
+  },
+  "servers": [
+    {
+      "url": "https://host:port/api/v1"
+    }
+  ],
+  "tags": [
+    {
+      "name": "product",
+      "description": "Products",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "order",
+      "description": "Access to Product orders",
+      "externalDocs": {
+        "description": "Find out more about orders",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "category",
+      "description": "Operations with category"
+    },
+    {
+      "name": "user",
+      "description": "Operations about user"
+    }
+  ],
+  "paths": {
+    "/product/get": {
+      "post": {
+        "tags": [
+          "product"
+        ],
+        "summary": "Finds Products by category",
+        "description": "Use limit and offset to pagination",
+        "operationId": "findProductsByCategory",
+        "requestBody": {
+          "description": "Filter product list",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductListReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SkuTop"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        }
+      }
+    },
+    "/product/{productId}": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "Find product by ID",
+        "description": "Returns a single product",
+        "operationId": "getProductById",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "ID of product to return",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not found"
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        }
+      }
+    },
+    "/admin/product": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "Product List Included map of Skus",
+        "description": "Can use for Admin Panel",
+        "operationId": "getAdminProducts",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "query",
+            "description": "Category Id that need to be considered for filter",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "format": "int"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Default value 20",
+            "required": false,
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "format": "int"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Default value 0",
+            "required": false,
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "format": "int"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductTop"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "product"
+        ],
+        "summary": "Create a product in the store with form data",
+        "description": "",
+        "operationId": "createProduct",
+        "requestBody": {
+          "description": "Create product object",
+          "content": {
+            "application/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductCreateReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succes operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      }
+    },
+    "/admin/product/{productId}": {
+      "put": {
+        "tags": [
+          "product"
+        ],
+        "summary": "Update product by ID",
+        "description": "Update product",
+        "operationId": "updateProductById",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "ID of product to return",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update product",
+          "content": {
+            "application/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductCreateReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "404": {
+            "description": "not found",
+            "content": {
+              "application/json": {
+                "example": "not found"
+              }
+            }
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "product"
+        ],
+        "summary": "Deletes a product",
+        "description": "delete a product",
+        "operationId": "deleteProduct",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "Product id to delete",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid product value"
+          },
+          "404": {
+            "description": "not found",
+            "content": {
+              "application/json": {
+                "example": "not found"
+              }
+            }
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      }
+    },
+    "/admin/product/{productId}/sku": {
+      "post": {
+        "tags": [
+          "product"
+        ],
+        "summary": "Create a sku in the store with form data",
+        "description": "",
+        "operationId": "createSku",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "ID of product",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Create sku object",
+          "content": {
+            "application/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/SkuResponse"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succes operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      }
+    },
+    "/product/sku/{skuId}": {
+      "put": {
+        "tags": [
+          "product"
+        ],
+        "summary": "Update a sku in the store with form data",
+        "description": "",
+        "operationId": "updateSku",
+        "parameters": [
+          {
+            "name": "skuId",
+            "in": "path",
+            "description": "ID of sku",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Create sku object",
+          "content": {
+            "application/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/SkuResponse"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succes operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "404": {
+            "description": "not found",
+            "content": {
+              "application/json": {
+                "example": "not found"
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "product"
+        ],
+        "summary": "Delete a sku by productId",
+        "description": "",
+        "operationId": "deleteSku",
+        "parameters": [
+          {
+            "name": "skuId",
+            "in": "path",
+            "description": "ID of product",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succes operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "404": {
+            "description": "not found",
+            "content": {
+              "application/json": {
+                "example": "not found"
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      }
+    },
+    "/product/skuValue/{skuValueId}": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "Product Options by SkuValueId",
+        "description": "Options by sku value Id",
+        "operationId": "getProductOption",
+        "parameters": [
+          {
+            "name": "skuValueId",
+            "in": "path",
+            "description": "skuValue Id that need to be considered for filter",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "format": "int"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SkuValueResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not found",
+            "content": {
+              "application/json": {
+                "example": "not found"
+              }
+            }
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        }
+      }
+    },
+    "/product/sku/{skuId}/option": {
+      "post": {
+        "tags": [
+          "product"
+        ],
+        "summary": "Create a sku option",
+        "description": "",
+        "operationId": "createSkuOption",
+        "parameters": [
+          {
+            "name": "skuId",
+            "in": "path",
+            "description": "ID of Sku",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "optionId",
+            "in": "query",
+            "description": "ID of Option",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "optionValueId",
+            "in": "query",
+            "description": "ID of Option Value",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succes operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "404": {
+            "description": "not found",
+            "content": {
+              "application/json": {
+                "example": "not found"
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      }
+    },
+    "/admin/product/skuValue/{skuValueId}": {
+      "delete": {
+        "tags": [
+          "product"
+        ],
+        "summary": "Delete Sku Option by SkuValueId",
+        "description": "Options by sku value Id",
+        "operationId": "deleleteProductOption",
+        "parameters": [
+          {
+            "name": "skuValueId",
+            "in": "path",
+            "description": "skuValue Id that need to be considered for filter",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "format": "int"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succes operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "404": {
+            "description": "not found",
+            "content": {
+              "application/json": {
+                "example": "not found"
+              }
+            }
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      }
+    },
+    "/order/get": {
+      "post": {
+        "tags": [
+          "order"
+        ],
+        "summary": "Find Order by User",
+        "description": "Use limit and offset to pagination",
+        "operationId": "findOrders",
+        "requestBody": {
+          "description": "Filter order list",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderListRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      }
+    },
+    "/order": {
+      "post": {
+        "tags": [
+          "order"
+        ],
+        "summary": "Create order",
+        "description": "Create order with form data and delete ordered items from cart",
+        "operationId": "createOrder",
+        "requestBody": {
+          "description": "Create product object",
+          "content": {
+            "application/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succes operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "404": {
+            "description": "not found"
+          },
+          "405": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      }
+    },
+    "/order/{orderId}": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "Find order by ID",
+        "description": "Returns a single order",
+        "operationId": "getOrderById",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "description": "ID of product to return",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not found"
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "order"
+        ],
+        "summary": "Update a order with form data",
+        "operationId": "updateOrder",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "description": "ID of sku",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Create sku object",
+          "content": {
+            "application/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succes operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "404": {
+            "description": "not found",
+            "content": {
+              "application/json": {
+                "example": "not found"
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "order"
+        ],
+        "summary": "Delete order by Id",
+        "operationId": "deleleteOrder",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "description": "order Id that need to be considered for filter",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "format": "int"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succes operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "404": {
+            "description": "not found",
+            "content": {
+              "application/json": {
+                "example": "not found"
+              }
+            }
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      }
+    },
+    "/admin/order/{orderId}": {
+      "put": {
+        "tags": [
+          "order"
+        ],
+        "summary": "Update order status",
+        "description": "",
+        "operationId": "updateOrderStatus",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "description": "ID of order",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "status of order",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succes operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "404": {
+            "description": "not found",
+            "content": {
+              "application/json": {
+                "example": "not found"
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      }
+    },
+    "/category": {
+      "get": {
+        "tags": [
+          "category"
+        ],
+        "summary": "List all Categories",
+        "operationId": "findCategories",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        }
+      }
+    },
+    "/category/{categoryId}": {
+      "get": {
+        "tags": [
+          "category"
+        ],
+        "summary": "Find category by ID",
+        "description": "Returns a single category",
+        "operationId": "getCategoryById",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "path",
+            "description": "ID of category to return",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleCategoryResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not found"
+          },
+          "405": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        }
+      }
+    },
+    "/admin/category": {
+      "post": {
+        "tags": [
+          "category"
+        ],
+        "summary": "Create category",
+        "operationId": "createCategory",
+        "requestBody": {
+          "description": "Create category object",
+          "content": {
+            "application/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryResponse"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succes operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      }
+    },
+    "/admin/category/{categoryId}": {
+      "put": {
+        "tags": [
+          "category"
+        ],
+        "summary": "Update category by categoryId",
+        "operationId": "updateCategory",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "path",
+            "description": "ID of sku",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Create sku object",
+          "content": {
+            "application/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryResponse"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succes operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "404": {
+            "description": "not found",
+            "content": {
+              "application/json": {
+                "example": "not found"
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "category"
+        ],
+        "summary": "Delete category by Id",
+        "operationId": "deleletCategory",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "path",
+            "description": "order Id that need to be considered for filter",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "format": "int"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succes operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "404": {
+            "description": "not found",
+            "content": {
+              "application/json": {
+                "example": "not found"
+              }
+            }
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      }
+    },
+    "/admin/category/{categoryId}/option": {
+      "post": {
+        "tags": [
+          "category"
+        ],
+        "summary": "Create category option",
+        "operationId": "createCategoryOption",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "path",
+            "description": "category Id",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "format": "int"
+            }
+          },
+          {
+            "name": "optionName",
+            "in": "query",
+            "description": "option name which whill be added to categoryId",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succes operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "404": {
+            "description": "not found",
+            "content": {
+              "application/json": {
+                "example": "not found"
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "category"
+        ],
+        "summary": "Update category option",
+        "operationId": "updateCategoryOption",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "path",
+            "description": "category Id",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "format": "int"
+            }
+          },
+          {
+            "name": "optionId",
+            "in": "query",
+            "description": "option name which whill be deleted from categoryId",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succes operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "404": {
+            "description": "not found",
+            "content": {
+              "application/json": {
+                "example": "not found"
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "category"
+        ],
+        "summary": "Delete category option",
+        "operationId": "deleletCategoryOption",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "path",
+            "description": "order Id that need to be considered for filter",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "format": "int"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succes operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "404": {
+            "description": "not found",
+            "content": {
+              "application/json": {
+                "example": "not found"
+              }
+            }
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      }
+    },
+    "/admin/category/optionValue": {
+      "post": {
+        "tags": [
+          "category"
+        ],
+        "summary": "Create category option Value",
+        "operationId": "createCategoryOptionValue",
+        "parameters": [
+          {
+            "name": "optionId",
+            "in": "query",
+            "description": "option id",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "format": "int"
+            }
+          },
+          {
+            "name": "optionValueName",
+            "in": "query",
+            "description": "Name of option value which whill be added to optionId",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succes operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "404": {
+            "description": "not found",
+            "content": {
+              "application/json": {
+                "example": "not found"
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "category"
+        ],
+        "summary": "Update category option Value",
+        "operationId": "updateCategoryOptionValue",
+        "parameters": [
+          {
+            "name": "optionValueId",
+            "in": "query",
+            "description": "category Id",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "format": "int"
+            }
+          },
+          {
+            "name": "optionId",
+            "in": "query",
+            "description": "option name which whill be deleted from categoryId",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "format": "int"
+            }
+          },
+          {
+            "name": "optionValueName",
+            "in": "query",
+            "description": "option name which whill be deleted from categoryId",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "format": "int"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succes operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "404": {
+            "description": "not found",
+            "content": {
+              "application/json": {
+                "example": "not found"
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "category"
+        ],
+        "summary": "Delete category option Value",
+        "operationId": "deleletCategoryOptionValue",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "query",
+            "description": "category Id",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "format": "int"
+            }
+          },
+          {
+            "name": "optionValueId",
+            "in": "query",
+            "description": "category Id",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "format": "int"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succes operation",
+            "content": {
+              "application/json": {
+                "example": "success"
+              }
+            }
+          },
+          "404": {
+            "description": "not found",
+            "content": {
+              "application/json": {
+                "example": "not found"
+              }
+            }
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        },
+        "security": [
+          {
+            "token_key": []
+          }
+        ]
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Login user",
+        "description": "Login and get token",
+        "operationId": "userLogin",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "description": "username",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "password",
+            "in": "query",
+            "description": "password",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succes operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not found",
+            "content": {
+              "application/json": {
+                "example": "not found"
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 10
+          },
+          "username": {
+            "type": "string",
+            "example": "theUser"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "John"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "James"
+          },
+          "email": {
+            "type": "string",
+            "example": "john@email.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "12345"
+          },
+          "phone": {
+            "type": "string",
+            "example": "12345"
+          },
+          "userStatus": {
+            "type": "integer",
+            "description": "User Status",
+            "format": "int32",
+            "example": 1
+          }
+        },
+        "xml": {
+          "name": "user"
+        }
+      },
+      "ProductResponse": {
+        "required": [
+          "name",
+          "photoUrls"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Product Example Name"
+          },
+          "description": {
+            "type": "string",
+            "example": "Product Example Description"
+          },
+          "categoryId": {
+            "type": "integer",
+            "format": "int",
+            "example": 3
+          },
+          "createTs": {
+            "type": "string",
+            "example": "2022-10-25T10:25:25.345417Z"
+          },
+          "countViewed": {
+            "type": "integer",
+            "format": "int",
+            "example": 0
+          },
+          "skuId": {
+            "type": "integer",
+            "format": "int",
+            "example": 1
+          },
+          "skuCode": {
+            "type": "string",
+            "example": "sku-123456"
+          },
+          "skuPrice": {
+            "type": "integer",
+            "format": "float32",
+            "example": 12.3
+          },
+          "skuQuantity": {
+            "type": "integer",
+            "format": "int",
+            "example": 2
+          },
+          "skuImage": {
+            "type": "string",
+            "example": "/static/sku-123456/image1.jpg, /static/sku-123456/image2.jpg"
+          },
+          "skuValueId": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "example": [
+              1,
+              2,
+              3,
+              4
+            ]
+          }
+        }
+      },
+      "OptionResponse": {
+        "type": "object",
+        "properties": {
+          "option1": {
+            "type": "string",
+            "example": "value1"
+          },
+          "option2": {
+            "type": "string",
+            "example": "value2"
+          }
+        }
+      },
+      "SkuValueResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "optionName"
+          },
+          "values": {
+            "$ref": "#/components/schemas/OptionValueResponse"
+          }
+        }
+      },
+      "OptionValueResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "optionValueName"
+          }
+        }
+      },
+      "ProductSkuResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "format": "int",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "Product Example Name"
+          },
+          "description": {
+            "type": "string",
+            "example": "Product Example Description"
+          },
+          "categoryId": {
+            "type": "integer",
+            "format": "int",
+            "example": 3
+          },
+          "createTs": {
+            "type": "string",
+            "example": "2022-10-25T10:25:25.345417Z"
+          },
+          "variants": {
+            "$ref": "#/components/schemas/SkuResponse"
+          }
+        }
+      },
+      "SkuResponse": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "integer",
+            "format": "int",
+            "example": 3
+          },
+          "skuCode": {
+            "type": "string",
+            "example": "sku-123456"
+          },
+          "skuPrice": {
+            "type": "integer",
+            "format": "float32",
+            "example": 12.3
+          },
+          "skuQuantity": {
+            "type": "integer",
+            "format": "int",
+            "example": 2
+          },
+          "skuImage": {
+            "type": "string",
+            "example": "/static/sku-123456/image1.jpg, /static/sku-123456/image2.jpg"
+          }
+        }
+      },
+      "ProductCreateReq": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "integer",
+            "format": "int",
+            "example": 3
+          },
+          "name": {
+            "type": "string",
+            "example": "Product Example Name"
+          },
+          "description": {
+            "type": "string",
+            "example": "Product Example Description"
+          },
+          "brandId": {
+            "type": "integer",
+            "format": "int",
+            "example": 45
+          },
+          "regionId": {
+            "type": "integer",
+            "format": "int",
+            "example": 33
+          }
+        }
+      },
+      "ProductListReq": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "format": "int",
+            "example": 10
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int",
+            "example": 0
+          },
+          "filter": {
+            "$ref": "#/components/schemas/ProductFilterReq"
+          }
+        }
+      },
+      "ProductFilterReq": {
+        "type": "object",
+        "properties": {
+          "productName": {
+            "type": "string",
+            "example": "Product Example Name"
+          },
+          "description": {
+            "type": "string",
+            "example": "Product Example Description"
+          },
+          "categoryId": {
+            "type": "integer",
+            "format": "int",
+            "example": 3
+          },
+          "brandId": {
+            "type": "integer",
+            "format": "int",
+            "example": 45
+          },
+          "regionId": {
+            "type": "integer",
+            "format": "int",
+            "example": 33
+          }
+        }
+      },
+      "SkuTop": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int",
+            "example": 1
+          },
+          "products": {
+            "$ref": "#/components/schemas/ProductResponse"
+          }
+        }
+      },
+      "ProductTop": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int",
+            "example": 1
+          },
+          "products": {
+            "$ref": "#/components/schemas/ProductSkuResponse"
+          }
+        }
+      },
+      "OrderResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int",
+            "example": 3
+          },
+          "address": {
+            "type": "string",
+            "example": "Some Street 111/2"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+99300000"
+          },
+          "comment": {
+            "type": "string",
+            "example": "here you comment"
+          },
+          "status": {
+            "type": "string",
+            "example": "Sended"
+          },
+          "orderItems": {
+            "$ref": "#/components/schemas/OrderItems"
+          }
+        }
+      },
+      "OrderRequest": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int",
+            "example": 3
+          },
+          "address": {
+            "type": "string",
+            "example": "Some Street 111/2"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+99300000"
+          },
+          "comment": {
+            "type": "string",
+            "example": "here you comment"
+          },
+          "notes": {
+            "type": "string",
+            "example": "here you note"
+          }
+        }
+      },
+      "OrderListRequest": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "format": "int",
+            "example": 10
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int",
+            "example": 0
+          },
+          "filter": {
+            "$ref": "#/components/schemas/OrderListFilter"
+          }
+        }
+      },
+      "OrderListFilter": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int",
+            "example": 3
+          },
+          "address": {
+            "type": "string",
+            "example": "Some Street 111/2"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+99300000"
+          },
+          "comment": {
+            "type": "string",
+            "example": "here you comment"
+          },
+          "notes": {
+            "type": "string",
+            "example": "here you note"
+          }
+        }
+      },
+      "OrderItems": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "integer",
+            "format": "int",
+            "example": 3
+          },
+          "skuId": {
+            "type": "integer",
+            "format": "int",
+            "example": 3
+          },
+          "codename": {
+            "type": "string",
+            "example": "sku-123456"
+          },
+          "quantity": {
+            "type": "string",
+            "example": 2
+          },
+          "price": {
+            "type": "string",
+            "example": 12.3
+          },
+          "subTotal": {
+            "type": "string",
+            "example": "Sended"
+          },
+          "skuImage": {
+            "type": "string",
+            "example": "/static/sku-123456/image1.jpg"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "username"
+          },
+          "role": {
+            "type": "string",
+            "example": "user"
+          },
+          "token": {
+            "type": "string",
+            "example": "token"
+          }
+        }
+      },
+      "CategoryResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "category1"
+          },
+          "parent": {
+            "type": "integer",
+            "format": "int",
+            "example": 0
+          },
+          "image": {
+            "type": "string",
+            "example": "/static/sku-123456/image1.jpg"
+          },
+          "icon": {
+            "type": "string",
+            "example": "/static/sku-123456/icon1.jpg"
+          }
+        }
+      },
+      "SingleCategoryResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "category1"
+          },
+          "parent": {
+            "type": "integer",
+            "format": "int",
+            "example": 0
+          },
+          "image": {
+            "type": "string",
+            "example": "/static/sku-123456/image1.jpg"
+          },
+          "icon": {
+            "type": "string",
+            "example": "/static/sku-123456/icon1.jpg"
+          },
+          "options": {
+            "$ref": "#/components/schemas/OptionResponse"
+          }
+        }
+      }
+    },
+    "requestBodies": {
+      "UserArray": {
+        "description": "List of user object",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "token_key": {
+        "type": "apiKey",
+        "name": "token",
+        "in": "header"
+      }
+    }
+  }
+}

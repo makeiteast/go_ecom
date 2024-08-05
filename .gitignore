@@ -1,0 +1,6 @@
+conf.json
+vendor/
+static/
+logfile.json
+.vscode
+.env

@@ -1,0 +1,50 @@
+syntax = "proto3";
+package grpc_handler;
+option go_package = "restapi/grpc_server";
+message OrderRequest {
+  string	Token = 1;    
+  int32	Limit = 2;
+  int32	Offset = 3;
+  OrderRequestFilter filter = 4;
+}
+
+message OrderRequestFilter {
+  int32	Id = 1;    
+  int32	UserId = 2;
+  string Phone = 3;
+  string Status = 4;
+  int64 Start = 5;
+  int64 End = 6;
+}
+
+//Orders gRPC proto init
+
+service OrderHandler {
+    rpc OrderList(OrderRequest) returns (OrderResponse) {}
+}
+
+message OrderItemSkuJson{
+  int32	Item_Id = 1;        
+  int32	SkuId = 2;         
+  string	SkuName = 3;    
+  int32	Quantity = 4;       
+  float	Price = 5;      
+  float	Subtotal = 6;   
+  string	SmallName = 7;   
+}
+
+message OrdersJson{
+  string	Id = 1;        
+  string	UserId = 2;                   
+  string	Address = 3;              
+  string	Phone = 4;                 
+  string	Comment = 5;               
+  string	Status = 6;                
+  string	Create_ts  = 7;        
+  repeated OrderItemSkuJson orderItems = 8;
+  string	Total_Sum  = 9;           
+}
+
+message OrderResponse{
+  repeated OrdersJson ordersJson = 1;
+}

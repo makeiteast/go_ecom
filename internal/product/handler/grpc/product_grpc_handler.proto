@@ -1,0 +1,51 @@
+syntax = "proto3";
+package grpc_handler;
+option go_package = "restapi/grpc_server";
+
+message ProductRequest {
+  int32	Limit = 1;
+  int32	Offset = 2;
+  int32	Category = 3;
+  ProductRequestFilter filter = 4;
+}
+
+message ProductTokenRequest {
+  string	Token = 1;    
+  int32	Limit = 2;
+  int32	Offset = 3;
+}
+
+message ProductRequestFilter {
+  string	ProductName  = 1; 
+  string	Description = 2;
+  int32	CategoryId = 3;
+  int32	BrandId = 4;
+  int32	RegionId = 5;
+  float	SkuPriceStart = 6; 
+  float	SkuPriceEnd = 7; 
+}
+
+service ProductHandler {
+  rpc Products(ProductRequest) returns (ProductReponse) {}
+  rpc ProductSingle(ProductRequest) returns (ProductReponse) {}
+}
+
+
+message ProductReponse {
+  string	Total = 1;
+  repeated	SkuJson skuJson = 2;
+}
+
+message SkuJson {
+  string	ProductName  = 1; 
+  string	Description = 2;
+  string	CategoryId = 3;   
+  string	CreateTs = 4;     
+  string	CountViewed = 5;  
+  string	SkuId = 6;        
+  string	SkuCode = 7;      
+  string	SkuPrice = 8;     
+  string	SkuQuantity = 9;  
+  string	SkuImage = 10;     
+	repeated int32 SkuValueId = 11;
+}

@@ -1,0 +1,86 @@
+version: '3'
+services:
+  postgres:
+    container_name: postgres-ecom
+    image: postgres:latest
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: 'market'
+      POSTGRES_PASSWORD: 'marketPass7766'
+      POSTGRES_DB: 'market'
+    ports:
+      - 5432:5432
+    networks:
+      - ecom-net
+    build:
+      context: .
+      dockerfile: ./utils/database/Dockerfile
+      
+
+  redis:
+    container_name: redis-ecom
+    image: redis:latest
+    ports:
+      - 6379:6379
+    command: redis-server --save 60 1 --requirepass 112211 
+    networks:
+      - ecom-net
+      
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    container_name: "swagger-ui-ecom"
+    ports:
+      - 8090:8080
+    volumes:
+      - ./swagger/openapi.json:/openapi.json
+    environment:
+      SWAGGER_JSON: /openapi.json
+    networks:
+        - ecom-net  
+
+  swagger-editor:
+    image: swaggerapi/swagger-editor
+    container_name: "swagger-editor-ecom"
+    ports:
+      - 80:8080
+    volumes:
+      - ./swagger/openapi.json:/openapi.json
+    environment:
+      SWAGGER_JSON: /openapi.json
+    networks:
+        - ecom-net       
+
+  zk:
+    container_name: zk
+    image: zookeeper:latest
+    ports: 
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: "2181"
+      ZOOKEEPER_TICK_TIME: "2000"
+      ZOOKEEPER_SERVERS: "zookeeper:22888:23888"
+    networks:
+      - ecom-net   
+
+  ecom-app:
+      build: .
+      container_name: ecom-app
+      image: ecom-app
+      ports:
+        - 8080:8080
+        - 50051:50051
+      depends_on:
+        - redis
+        - postgres
+      networks:
+        - ecom-net
+     
+volumes:
+  redis_data:
+    driver: local
+  pg-data:
+
+networks:
+    ecom-net:
